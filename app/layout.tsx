@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="light">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--color-page-bg)] text-[var(--color-text-primary)]`}
+        className={`${process.env.ENV === "development" ? "debug-screens" : ""} ${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--color-page-bg)] text-[var(--color-text-primary)]`}
       >
         {children}
       </body>

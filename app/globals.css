@@ -1,6 +1,40 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.debug-screens::before {
+  content: "";
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 9999;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: rgb(0 0 0 / 0.8);
+  color: white;
+  border-top-right-radius: 0.25rem;
+  pointer-events: none;
+
+  @media (width < 640px) {
+    content: "xs";
+  }
+  @media (640px <= width < 768px) {
+    content: "sm";
+  }
+  @media (768px <= width < 1024px) {
+    content: "md";
+  }
+  @media (1024px <= width < 1280px) {
+    content: "lg";
+  }
+  @media (1280px <= width < 1536px) {
+    content: "xl";
+  }
+  @media (width >= 1536px) {
+    content: "2xl";
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

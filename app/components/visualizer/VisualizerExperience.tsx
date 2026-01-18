@@ -17,6 +17,7 @@ import { analyzeCode } from "../../lib/utils/code-analyzer";
 export function VisualizerExperience() {
   const [code, setCode] = useState(DEFAULT_CODE);
   const [hasVisualized, setHasVisualized] = useState(false);
+  const [isBannerVisible, setIsBannerVisible] = useState(true);
 
   const steps = useMemo(() => {
     if (!hasVisualized) {
@@ -58,25 +59,35 @@ export function VisualizerExperience() {
 
   return (
     <div className="min-h-screen bg-[var(--color-page-bg)] text-[var(--color-text-primary)] transition-colors duration-300">
-      <Banner />
+      <Banner
+        isVisible={isBannerVisible}
+        onClose={() => setIsBannerVisible(false)}
+      />
       <Navigation isDarkMode={isDarkMode} onToggleTheme={toggleTheme} />
 
-      <main className="mx-auto max-w-[1920px] px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1920px] px-4 py-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <section className="mb-8">
-          <h1 className="mb-3 text-2xl font-bold text-[var(--color-text-primary)]">
+        <section className="mb-4">
+          <h1 className="mb-1 text-xl font-bold text-[var(--color-text-primary)]">
             JavaScript Event Loop Visualizer
           </h1>
-          <p className="text-md text-[var(--color-text-secondary)]">
+          <p className="text-sm text-[var(--color-text-secondary)]">
             Write your own JavaScript code and visualize how the event loop
             handles async operations, microtasks, and macrotasks in real-time.
           </p>
         </section>
 
         {/* Main Layout: Code Editor (1/3) + Visualizer (2/3) */}
-        <div className="flex gap-6">
+        <div
+          className="flex flex-col gap-6 lg:flex-row"
+          style={{
+            height: isBannerVisible
+              ? "calc(100vh - 220px)"
+              : "calc(100vh - 180px)",
+          }}
+        >
           {/* Left Side - Code Editor (1/3) */}
-          <div className="w-1/3 min-w-[400px]">
+          <div className="w-full lg:w-1/3 lg:min-w-[400px]">
             <CodeEditor
               code={code}
               onChange={setCode}
@@ -94,7 +105,7 @@ export function VisualizerExperience() {
                     <img
                       src="/js.png"
                       alt="JavaScript"
-                      className="mx-auto h-24 w-24"
+                      className="mx-auto h-24 w-24 rounded-lg"
                     />
                   </div>
                   <h2 className="mb-2 text-lg font-bold text-[var(--color-text-primary)]">
@@ -110,9 +121,9 @@ export function VisualizerExperience() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Controls */}
-                <div>
+              <div className="flex h-full flex-col gap-2">
+                {/* Controls - Fixed Height */}
+                <div className="flex-shrink-0">
                   <VisualizerControls
                     isPlaying={isPlaying}
                     isFirstStep={isFirstStep}
@@ -125,36 +136,49 @@ export function VisualizerExperience() {
                   <ProgressBar current={currentStep} total={totalSteps} />
                 </div>
 
-                {/* Current Step Display */}
-                <CurrentStepDisplay
-                  description={currentStepData.description}
-                  explanation={currentStepData.explanation}
-                  highlight={currentStepData.highlight}
-                />
-
-                {/* Queues */}
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <QueueVisualizer
-                    title="Call Stack"
-                    items={currentStepData.callStack}
-                    queueType="callstack"
-                  />
-                  <QueueVisualizer
-                    title="Microtask Queue"
-                    subtitle="Promises, async/await"
-                    items={currentStepData.microtaskQueue}
-                    queueType="microtask"
-                  />
-                  <QueueVisualizer
-                    title="Callback Queue"
-                    subtitle="setTimeout, setInterval"
-                    items={currentStepData.callbackQueue}
-                    queueType="callback"
+                {/* Current Step Display - Compact */}
+                <div className="flex-shrink-0">
+                  <CurrentStepDisplay
+                    description={currentStepData.description}
+                    explanation={currentStepData.explanation}
+                    highlight={currentStepData.highlight}
                   />
                 </div>
 
-                {/* Console Output */}
-                <ConsoleOutput output={currentStepData.output} />
+                {/* Queues and Console - Flexible Grid */}
+                <div className="grid flex-1 grid-cols-1 gap-2 overflow-hidden 2xl:grid-cols-2">
+                  {/* Left Column: 3 Queues Stacked - Hidden on xl and below, visible from 2xl */}
+                  <div className="hidden flex-col gap-2 overflow-hidden 2xl:flex">
+                    <div className="flex-1 overflow-hidden">
+                      <QueueVisualizer
+                        title="Call Stack"
+                        items={currentStepData.callStack}
+                        queueType="callstack"
+                      />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <QueueVisualizer
+                        title="Microtask Queue"
+                        subtitle="Promises, async/await"
+                        items={currentStepData.microtaskQueue}
+                        queueType="microtask"
+                      />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <QueueVisualizer
+                        title="Callback Queue"
+                        subtitle="setTimeout, setInterval"
+                        items={currentStepData.callbackQueue}
+                        queueType="callback"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right Column: Console Output */}
+                  <div className="overflow-hidden">
+                    <ConsoleOutput output={currentStepData.output} />
+                  </div>
+                </div>
               </div>
             )}
           </div>

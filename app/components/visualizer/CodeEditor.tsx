@@ -46,23 +46,23 @@ export function CodeEditor({
   return (
     <div className="flex h-full flex-col rounded-lg bg-[var(--color-card-bg)] shadow-md">
       {/* Header */}
-      <div className="bg-[var(--color-surface)] px-4 py-3">
-        <div className="mb-3 flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-red-500"></div>
-            <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
-            <div className="h-3 w-3 rounded-full bg-green-500"></div>
+      <div className="bg-[var(--color-surface)] px-3 py-2">
+        <div className="mb-2 flex items-center gap-2">
+          <div className="flex gap-1">
+            <div className="h-2.5 w-2.5 rounded-full bg-red-500"></div>
+            <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+            <div className="h-2.5 w-2.5 rounded-full bg-green-500"></div>
           </div>
-          <span className="ml-2 text-sm font-medium text-[var(--color-text-primary)]">
+          <span className="ml-1.5 text-xs font-medium text-[var(--color-text-primary)]">
             script.js
           </span>
         </div>
         <button
           onClick={onRunCode}
-          className="flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-6 py-3 font-medium text-black transition-colors"
+          className="flex items-center gap-1.5 rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-black transition-colors hover:opacity-90"
         >
-          <Play className="h-4 w-4" />
-          Visualize Code
+          <Play className="h-3.5 w-3.5" />
+          Visualize
         </button>
       </div>
 
@@ -76,7 +76,7 @@ export function CodeEditor({
             lineHeight: "1.6",
             tabSize: 2,
           }}
-          minRows={25}
+          minRows={10}
           placeholder="// Write your JavaScript code here..."
         />
       </div>

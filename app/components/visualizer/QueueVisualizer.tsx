@@ -37,29 +37,29 @@ export function QueueVisualizer({
   const style = queueStyles[queueType];
 
   return (
-    <div className="rounded-2xl bg-[var(--color-surface)] p-6">
+    <div className="flex h-full flex-col rounded-xl bg-[var(--color-surface)] p-4">
       <div className="mb-2 flex items-center gap-2">
         <div className={`h-2 w-2 rounded-full ${style.dotClass}`} />
-        <h3 className="text-lg font-bold text-[var(--color-text-primary)]">
+        <h3 className="text-sm font-bold text-[var(--color-text-primary)]">
           {title}
         </h3>
       </div>
       {subtitle ? (
-        <p className="mb-5 text-xs text-[var(--color-text-secondary)]">
+        <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
           {subtitle}
         </p>
       ) : null}
 
-      <div className="min-h-[220px] space-y-2">
+      <div className="flex-1 space-y-1.5 overflow-y-auto">
         {items.length === 0 ? (
-          <div className="py-12 text-center text-sm text-[var(--color-muted)]">
+          <div className="py-6 text-center text-xs text-[var(--color-muted)]">
             Empty
           </div>
         ) : (
           items.map((item, index) => (
             <div
               key={`${item}-${index}`}
-              className={`rounded-xl  p-4 font-mono text-sm ${style.itemClass}`}
+              className={`rounded-lg p-2.5 font-mono text-xs ${style.itemClass}`}
             >
               {item}
             </div>
