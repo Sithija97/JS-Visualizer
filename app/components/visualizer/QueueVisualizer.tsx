@@ -37,7 +37,7 @@ export function QueueVisualizer({
   const style = queueStyles[queueType];
 
   return (
-    <div className="rounded-2xl border border-[var(--color-card-border)] bg-[var(--color-surface)] p-6">
+    <div className="rounded-2xl bg-[var(--color-surface)] p-6">
       <div className="mb-2 flex items-center gap-2">
         <div className={`h-2 w-2 rounded-full ${style.dotClass}`} />
         <h3 className="text-lg font-bold text-[var(--color-text-primary)]">
@@ -59,7 +59,7 @@ export function QueueVisualizer({
           items.map((item, index) => (
             <div
               key={`${item}-${index}`}
-              className={`rounded-xl border p-4 font-mono text-sm ${style.itemClass}`}
+              className={`rounded-xl  p-4 font-mono text-sm ${style.itemClass}`}
             >
               {item}
             </div>
