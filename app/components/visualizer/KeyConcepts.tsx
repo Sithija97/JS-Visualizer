@@ -4,7 +4,7 @@ import { KEY_CONCEPTS } from "../../lib/constants/key-concepts";
 
 export function KeyConcepts() {
   return (
-    <div className="rounded-2xl border border-[var(--color-card-border)] bg-[var(--color-surface)] p-8">
+    <div className="rounded-2xl bg-[var(--color-surface)] p-8">
       <h3 className="mb-6 text-xl font-bold text-[var(--color-text-primary)]">
         Key Concepts
       </h3>

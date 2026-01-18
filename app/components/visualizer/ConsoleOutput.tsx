@@ -6,7 +6,7 @@ type ConsoleOutputProps = {
 
 export function ConsoleOutput({ output }: ConsoleOutputProps) {
   return (
-    <div className="rounded-2xl border border-[var(--color-card-border)] bg-[var(--color-surface)] p-6">
+    <div className="rounded-2xl bg-[var(--color-surface)] p-6">
       <div className="mb-5 flex items-center gap-2">
         <div className="h-2 w-2 rounded-full bg-[var(--color-console-text)]" />
         <h3 className="text-lg font-bold text-[var(--color-text-primary)]">

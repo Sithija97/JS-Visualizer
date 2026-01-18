@@ -14,17 +14,17 @@ const queueStyles: Record<QueueType, { dotClass: string; itemClass: string }> =
     callstack: {
       dotClass: "bg-[var(--color-queue-callstack-border)]",
       itemClass:
-        "border-[var(--color-queue-callstack-border)] bg-[var(--color-queue-callstack-bg)] text-[var(--color-queue-callstack-text)]",
+        "bg-[var(--color-queue-callstack-bg)] text-[var(--color-queue-callstack-text)]",
     },
     microtask: {
       dotClass: "bg-[var(--color-queue-microtask-border)]",
       itemClass:
-        "border-[var(--color-queue-microtask-border)] bg-[var(--color-queue-microtask-bg)] text-[var(--color-queue-microtask-text)]",
+        "bg-[var(--color-queue-microtask-bg)] text-[var(--color-queue-microtask-text)]",
     },
     callback: {
       dotClass: "bg-[var(--color-queue-callback-border)]",
       itemClass:
-        "border-[var(--color-queue-callback-border)] bg-[var(--color-queue-callback-bg)] text-[var(--color-queue-callback-text)]",
+        "bg-[var(--color-queue-callback-bg)] text-[var(--color-queue-callback-text)]",
     },
   };
 

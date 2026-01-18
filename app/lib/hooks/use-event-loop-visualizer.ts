@@ -1,23 +1,29 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { EVENT_LOOP_STEPS } from "../constants/event-loop-steps";
+import { EventLoopStep } from "../constants/event-loop-steps";
 
 const AUTO_PLAY_INTERVAL = 2000;
 
-export function useEventLoopVisualizer() {
+export function useEventLoopVisualizer(steps: EventLoopStep[]) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const intervalRef = useRef<number>();
 
-  const totalSteps = EVENT_LOOP_STEPS.length;
+  const totalSteps = steps.length;
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
 
   const currentStepData = useMemo(
-    () => EVENT_LOOP_STEPS[currentStep],
-    [currentStep],
+    () => steps[currentStep] || steps[0],
+    [currentStep, steps],
   );
+
+  // Reset to step 0 when steps change
+  useEffect(() => {
+    setCurrentStep(0);
+    setIsPlaying(false);
+  }, [steps]);
 
   useEffect(() => {
     if (!isPlaying || isLastStep) {

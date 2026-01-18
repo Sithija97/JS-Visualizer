@@ -47,7 +47,7 @@ export function VisualizerControls({
       <button
         onClick={onPrevious}
         disabled={isFirstStep}
-        className="flex items-center gap-2 rounded-lg border border-[var(--color-control-border)] bg-[var(--color-control-surface)] px-5 py-3 font-medium text-[var(--color-text-primary)] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex items-center gap-2 rounded-lg bg-[var(--color-control-surface)] px-5 py-3 font-medium text-[var(--color-text-primary)] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
       >
         <ChevronLeft size={18} /> Previous
       </button>
@@ -55,14 +55,14 @@ export function VisualizerControls({
       <button
         onClick={onNext}
         disabled={isLastStep}
-        className="flex items-center gap-2 rounded-lg border border-[var(--color-control-border)] bg-[var(--color-control-surface)] px-5 py-3 font-medium text-[var(--color-text-primary)] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex items-center gap-2 rounded-lg bg-[var(--color-control-surface)] px-5 py-3 font-medium text-[var(--color-text-primary)] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
       >
         Next <ChevronRight size={18} />
       </button>
 
       <button
         onClick={onReset}
-        className="flex items-center gap-2 rounded-lg border border-[var(--color-control-border)] bg-[var(--color-control-surface)] px-5 py-3 font-medium text-[var(--color-text-primary)] transition-colors"
+        className="flex items-center gap-2 rounded-lg bg-[var(--color-control-surface)] px-5 py-3 font-medium text-[var(--color-text-primary)] transition-colors"
       >
         <RotateCcw size={18} /> Reset
       </button>
