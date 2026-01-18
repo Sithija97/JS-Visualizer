@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Banner } from "../ui/Banner";
 import { Navigation } from "../ui/Navigation";
 import { ProgressBar } from "../ui/ProgressBar";
@@ -13,29 +13,62 @@ import { CodeEditor, DEFAULT_CODE } from "./CodeEditor";
 import { useEventLoopVisualizer } from "../../lib/hooks/use-event-loop-visualizer";
 import { useThemeMode } from "../../lib/hooks/use-theme-mode";
 import { analyzeCode } from "../../lib/utils/code-analyzer";
+import { EventLoopStep } from "../../lib/constants/event-loop-steps";
 
 export function VisualizerExperience() {
   const [code, setCode] = useState(DEFAULT_CODE);
   const [hasVisualized, setHasVisualized] = useState(false);
   const [isBannerVisible, setIsBannerVisible] = useState(true);
 
-  const steps = useMemo(() => {
+  const initialStep: EventLoopStep = {
+    step: 0,
+    description: "Click 'Visualize' to analyze your code",
+    callStack: [],
+    microtaskQueue: [],
+    callbackQueue: [],
+    output: [],
+    highlight: "Ready",
+    explanation:
+      "Write your JavaScript code above and click the Visualize button to see how the event loop processes it step by step.",
+  };
+
+  const errorStep: EventLoopStep = {
+    step: 0,
+    description: "Error: Unable to analyze code",
+    callStack: [],
+    microtaskQueue: [],
+    callbackQueue: [],
+    output: ["Error: Please check your code syntax"],
+    highlight: "ERROR",
+    explanation:
+      "There was an error analyzing your code. Please ensure it's valid JavaScript.",
+  };
+
+  const [steps, setSteps] = useState<EventLoopStep[]>([initialStep]);
+
+  useEffect(() => {
     if (!hasVisualized) {
-      return [
-        {
-          step: 0,
-          description: "Click 'Visualize' to analyze your code",
-          callStack: [],
-          microtaskQueue: [],
-          callbackQueue: [],
-          output: [],
-          highlight: "Ready",
-          explanation:
-            "Write your JavaScript code above and click the Visualize button to see how the event loop processes it step by step.",
-        },
-      ];
+      setSteps([initialStep]);
+      return;
     }
-    return analyzeCode(code);
+
+    let cancelled = false;
+
+    analyzeCode(code)
+      .then((result) => {
+        if (!cancelled) {
+          setSteps(result);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSteps([errorStep]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [code, hasVisualized]);
 
   const {

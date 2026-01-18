@@ -1,321 +1,328 @@
 import { EventLoopStep } from "../constants/event-loop-steps";
 
-interface ExecutionState {
-  callStack: string[];
-  microtaskQueue: string[];
-  callbackQueue: string[];
-  output: string[];
+type AnalyzerEvent =
+  | { type: "start" }
+  | { type: "sync-complete" }
+  | { type: "log"; message: string; task?: string }
+  | { type: "microtask-queued"; label: string }
+  | { type: "macrotask-queued"; label: string }
+  | { type: "microtask-start"; label: string }
+  | { type: "microtask-end"; label: string }
+  | { type: "macrotask-start"; label: string }
+  | { type: "macrotask-end"; label: string }
+  | { type: "error"; message: string };
+
+type AnalyzerResult = {
+  events: AnalyzerEvent[];
+};
+
+const DEFAULT_STEP: EventLoopStep = {
+  step: 0,
+  description: "Click 'Visualize' to analyze your code",
+  callStack: [],
+  microtaskQueue: [],
+  callbackQueue: [],
+  output: [],
+  highlight: "Ready",
+  explanation:
+    "Write your JavaScript code above and click the Visualize button to see how the event loop processes it step by step.",
+};
+
+const ERROR_STEP: EventLoopStep = {
+  step: 0,
+  description: "Error: Unable to analyze code",
+  callStack: [],
+  microtaskQueue: [],
+  callbackQueue: [],
+  output: ["Error: Please check your code syntax"],
+  highlight: "ERROR",
+  explanation:
+    "There was an error analyzing your code. Please ensure it's valid JavaScript.",
+};
+
+export async function analyzeCode(code: string): Promise<EventLoopStep[]> {
+  if (typeof window === "undefined" || typeof Worker === "undefined") {
+    return [ERROR_STEP];
+  }
+
+  const result = await runInWorker(code);
+  return buildSteps(result);
 }
 
-export class CodeAnalyzer {
-  private code: string;
+async function runInWorker(code: string): Promise<AnalyzerResult> {
+  const workerScript = createWorkerScript();
+  const blob = new Blob([workerScript], { type: "application/javascript" });
+  const workerUrl = URL.createObjectURL(blob);
+  const worker = new Worker(workerUrl);
 
-  constructor(code: string) {
-    this.code = code;
-  }
-
-  analyze(): EventLoopStep[] {
-    try {
-      return this.simpleAnalyze();
-    } catch (error) {
-      console.error("Error analyzing code:", error);
-      return this.getErrorSteps();
-    }
-  }
-
-  private simpleAnalyze(): EventLoopStep[] {
-    const steps: EventLoopStep[] = [];
-    const state: ExecutionState = {
-      callStack: [],
-      microtaskQueue: [],
-      callbackQueue: [],
-      output: [],
+  return new Promise((resolve) => {
+    const cleanup = () => {
+      worker.terminate();
+      URL.revokeObjectURL(workerUrl);
     };
 
-    const lines = this.code
-      .split("\n")
-      .map((l) => l.trim())
-      .filter((l) => l && !l.startsWith("//"));
-
-    // Initial state
-    steps.push({
-      step: 0,
-      description: "Initial state - Code starts executing",
-      callStack: [],
-      microtaskQueue: [],
-      callbackQueue: [],
-      output: [],
-      highlight: "Ready to execute",
-      explanation:
-        "The JavaScript engine is ready to execute your code synchronously first",
-    });
-
-    let stepNumber = 1;
-    let asyncFunctionName = "";
-    let inAsyncFunction = false;
-    let afterAwait = false;
-    let timeoutCount = 0;
-    let promiseCount = 0;
-    let asyncCount = 0;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-
-      // Skip function declarations (we'll handle calls)
-      if (line.startsWith("async function") || line.startsWith("function")) {
-        const match = line.match(/function\s+(\w+)/);
-        if (match && line.startsWith("async")) {
-          asyncFunctionName = match[1];
-        }
-        continue;
+    worker.onmessage = (event) => {
+      if (event.data?.type === "done") {
+        cleanup();
+        resolve({ events: event.data.events as AnalyzerEvent[] });
       }
 
-      // Async function call
-      if (line.includes(`${asyncFunctionName}()`) && asyncFunctionName) {
-        state.callStack.push(`${asyncFunctionName}()`);
-        steps.push({
-          step: stepNumber++,
-          description: `Call async function: ${asyncFunctionName}()`,
-          callStack: [...state.callStack],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: line,
-          explanation: `${asyncFunctionName} is an async function, it starts executing synchronously`,
-        });
-        inAsyncFunction = true;
-        continue;
-      }
-
-      // console.log
-      if (line.includes("console.log")) {
-        const match = line.match(/console\.log\(['"](.+?)['"]\)/);
-        if (match) {
-          const logMessage = match[1];
-
-          state.callStack.push(`console.log('${logMessage}')`);
-          steps.push({
-            step: stepNumber++,
-            description: `Execute: console.log('${logMessage}')`,
-            callStack: [...state.callStack],
-            microtaskQueue: [...state.microtaskQueue],
-            callbackQueue: [...state.callbackQueue],
-            output: [...state.output],
-            highlight: line,
-            explanation: afterAwait
-              ? "This runs after await completes, as part of a microtask"
-              : "Synchronous console.log executes immediately",
-          });
-
-          state.output.push(logMessage);
-          state.callStack.pop();
-
-          if (afterAwait) {
-            afterAwait = false;
-          }
-        }
-      }
-
-      // setTimeout
-      if (line.includes("setTimeout")) {
-        timeoutCount++;
-        state.callStack.push("setTimeout()");
-        steps.push({
-          step: stepNumber++,
-          description: "setTimeout() is called",
-          callStack: [...state.callStack],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: line,
-          explanation: "setTimeout sends callback to Web API timer",
-        });
-
-        state.callStack.pop();
-        state.callbackQueue.push(`setTimeout callback #${timeoutCount}`);
-
-        steps.push({
-          step: stepNumber++,
-          description: "setTimeout callback registered in Callback Queue",
-          callStack: [...state.callStack],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: line,
-          explanation:
-            "After timer expires, callback waits in the Callback Queue (Macrotask Queue)",
+      if (event.data?.type === "error") {
+        cleanup();
+        resolve({
+          events: [{ type: "error", message: event.data.message || "Error" }],
         });
       }
+    };
 
-      // await
-      if (line.includes("await")) {
-        asyncCount++;
-        const funcMatch = line.match(/await\s+(\w+)\(/);
-        const funcName = funcMatch ? funcMatch[1] : "async operation";
-
-        state.callStack.push(`${funcName}()`);
-        steps.push({
-          step: stepNumber++,
-          description: `Execute: await ${funcName}()`,
-          callStack: [...state.callStack],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: line,
-          explanation: `${funcName}() executes synchronously first`,
-        });
-
-        state.callStack.pop();
-        state.microtaskQueue.push(`async continuation #${asyncCount}`);
-
-        steps.push({
-          step: stepNumber++,
-          description:
-            "Await pauses execution, continuation queued as microtask",
-          callStack: [...state.callStack],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: line,
-          explanation:
-            "Everything after 'await' becomes a microtask. Function pauses here.",
-        });
-
-        afterAwait = true;
-      }
-
-      // new Promise
-      if (line.includes("new Promise")) {
-        promiseCount++;
-        state.callStack.push("Promise executor");
-        steps.push({
-          step: stepNumber++,
-          description: "new Promise - executor runs synchronously",
-          callStack: [...state.callStack],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: line,
-          explanation:
-            "Promise executor function runs immediately and synchronously",
-        });
-        state.callStack.pop();
-      }
-
-      // .then()
-      if (line.includes(".then(")) {
-        state.microtaskQueue.push(`promise.then() #${promiseCount}`);
-        steps.push({
-          step: stepNumber++,
-          description: ".then() callback added to Microtask Queue",
-          callStack: [...state.callStack],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: line,
-          explanation: ".then() registers callback in the Microtask Queue",
-        });
-      }
-    }
-
-    // Event loop processing
-    if (
-      state.callStack.length === 0 &&
-      (state.microtaskQueue.length > 0 || state.callbackQueue.length > 0)
-    ) {
-      steps.push({
-        step: stepNumber++,
-        description: "Call Stack EMPTY! Event Loop starts",
-        callStack: [],
-        microtaskQueue: [...state.microtaskQueue],
-        callbackQueue: [...state.callbackQueue],
-        output: [...state.output],
-        highlight: "EVENT LOOP STARTS",
-        explanation:
-          "Call stack is empty. Event loop will process ALL microtasks first, then macrotasks",
-      });
-
-      // Process all microtasks
-      while (state.microtaskQueue.length > 0) {
-        const microtask = state.microtaskQueue.shift()!;
-        steps.push({
-          step: stepNumber++,
-          description: `Process Microtask: ${microtask}`,
-          callStack: [microtask],
-          microtaskQueue: [...state.microtaskQueue],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: microtask,
-          explanation:
-            "Microtask executes - promises have priority over macrotasks",
-        });
-      }
-
-      // Check for macrotasks only after all microtasks are done
-      if (state.callbackQueue.length > 0) {
-        steps.push({
-          step: stepNumber++,
-          description: "All Microtasks complete! Moving to Macrotasks",
-          callStack: [],
-          microtaskQueue: [],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: "MACROTASK PHASE",
-          explanation:
-            "Microtask queue is empty. Event loop now processes one macrotask",
-        });
-      }
-
-      // Process macrotasks
-      while (state.callbackQueue.length > 0) {
-        const macrotask = state.callbackQueue.shift()!;
-        steps.push({
-          step: stepNumber++,
-          description: `Process Macrotask: ${macrotask}`,
-          callStack: [macrotask],
-          microtaskQueue: [],
-          callbackQueue: [...state.callbackQueue],
-          output: [...state.output],
-          highlight: macrotask,
-          explanation: "Macrotask executes from the Callback Queue",
-        });
-      }
-    }
-
-    // Final state
-    steps.push({
-      step: stepNumber,
-      description: "COMPLETE! All queues empty",
-      callStack: [],
-      microtaskQueue: [],
-      callbackQueue: [],
-      output: [...state.output],
-      highlight: "DONE ✓",
-      explanation:
-        "Execution complete. All tasks have been processed by the event loop.",
-    });
-
-    return steps;
-  }
-
-  private getErrorSteps(): EventLoopStep[] {
-    return [
-      {
-        step: 0,
-        description: "Error: Unable to parse code",
-        callStack: [],
-        microtaskQueue: [],
-        callbackQueue: [],
-        output: ["Error: Please check your code syntax"],
-        highlight: "ERROR",
-        explanation:
-          "There was an error analyzing your code. Please ensure it's valid JavaScript.",
-      },
-    ];
-  }
+    worker.postMessage({ code });
+  });
 }
 
-export function analyzeCode(code: string): EventLoopStep[] {
-  const analyzer = new CodeAnalyzer(code);
-  return analyzer.analyze();
+function createWorkerScript(): string {
+  return `
+self.onmessage = (event) => {
+  const code = event.data.code || "";
+  const events = [];
+  let currentTask = null;
+  let pendingMicro = 0;
+  let pendingMacro = 0;
+  let microId = 0;
+  let macroId = 0;
+
+  const record = (payload) => events.push(payload);
+
+  const baseSetTimeout = self.setTimeout.bind(self);
+  const baseQueueMicrotask = self.queueMicrotask
+    ? self.queueMicrotask.bind(self)
+    : (cb) => Promise.resolve().then(cb);
+
+  const checkDone = () => {
+    if (pendingMicro === 0 && pendingMacro === 0) {
+      baseSetTimeout(() => {
+        if (pendingMicro === 0 && pendingMacro === 0) {
+          self.postMessage({ type: "done", events });
+        }
+      }, 0);
+    }
+  };
+
+  console.log = (...args) => {
+    const message = args.map(String).join(" ");
+    record({ type: "log", message, task: currentTask || undefined });
+  };
+
+  const scheduleMicrotask = (label, callback) => {
+    pendingMicro += 1;
+    record({ type: "microtask-queued", label });
+
+    baseQueueMicrotask(() => {
+      currentTask = label;
+      record({ type: "microtask-start", label });
+      try {
+        callback();
+      } catch (err) {
+        record({ type: "error", message: String(err) });
+      }
+      record({ type: "microtask-end", label });
+      currentTask = null;
+      pendingMicro -= 1;
+      checkDone();
+    });
+  };
+
+  self.queueMicrotask = (callback) => {
+    const label = "queueMicrotask #" + (++microId);
+    scheduleMicrotask(label, callback);
+  };
+
+  self.setTimeout = (callback, delay, ...args) => {
+    const label = "setTimeout callback #" + (++macroId);
+    pendingMacro += 1;
+    record({ type: "macrotask-queued", label });
+
+    baseSetTimeout(() => {
+      currentTask = label;
+      record({ type: "macrotask-start", label });
+      try {
+        if (typeof callback === "function") {
+          callback(...args);
+        }
+      } catch (err) {
+        record({ type: "error", message: String(err) });
+      }
+      record({ type: "macrotask-end", label });
+      currentTask = null;
+      pendingMacro -= 1;
+      checkDone();
+    }, 0);
+
+    return macroId;
+  };
+
+  const originalThen = Promise.prototype.then;
+  Promise.prototype.then = function (onFulfilled, onRejected) {
+    const label = "promise.then() #" + (++microId);
+    pendingMicro += 1;
+    record({ type: "microtask-queued", label });
+
+    const wrap = (handler, isRejection) => (value) => {
+      currentTask = label;
+      record({ type: "microtask-start", label });
+      try {
+        if (typeof handler === "function") {
+          return handler(value);
+        }
+        if (isRejection) {
+          throw value;
+        }
+        return value;
+      } finally {
+        record({ type: "microtask-end", label });
+        currentTask = null;
+        pendingMicro -= 1;
+        checkDone();
+      }
+    };
+
+    return originalThen.call(this, wrap(onFulfilled, false), wrap(onRejected, true));
+  };
+
+  try {
+    record({ type: "start" });
+    const runner = new Function(code);
+    runner();
+    record({ type: "sync-complete" });
+  } catch (err) {
+    record({ type: "error", message: String(err) });
+  } finally {
+    checkDone();
+  }
+};
+  `;
+}
+
+function buildSteps(result: AnalyzerResult): EventLoopStep[] {
+  const steps: EventLoopStep[] = [DEFAULT_STEP];
+  const state = {
+    callStack: [] as string[],
+    microtaskQueue: [] as string[],
+    callbackQueue: [] as string[],
+    output: [] as string[],
+  };
+
+  const addStep = (
+    description: string,
+    highlight: string,
+    explanation: string,
+  ) => {
+    steps.push({
+      step: steps.length,
+      description,
+      callStack: [...state.callStack],
+      microtaskQueue: [...state.microtaskQueue],
+      callbackQueue: [...state.callbackQueue],
+      output: [...state.output],
+      highlight,
+      explanation,
+    });
+  };
+
+  let eventLoopStarted = false;
+
+  for (const event of result.events) {
+    if (event.type === "error") {
+      return [ERROR_STEP];
+    }
+
+    if (event.type === "microtask-queued") {
+      state.microtaskQueue.push(event.label);
+      addStep(
+        `Microtask queued: ${event.label}`,
+        event.label,
+        "Microtask added to the Microtask Queue",
+      );
+      continue;
+    }
+
+    if (event.type === "macrotask-queued") {
+      state.callbackQueue.push(event.label);
+      addStep(
+        `Macrotask queued: ${event.label}`,
+        event.label,
+        "Macrotask added to the Callback Queue",
+      );
+      continue;
+    }
+
+    if (event.type === "microtask-start") {
+      if (!eventLoopStarted) {
+        eventLoopStarted = true;
+        addStep(
+          "Call Stack EMPTY! Event Loop starts",
+          "EVENT LOOP STARTS",
+          "Call stack is empty. Event loop will process ALL microtasks first, then macrotasks",
+        );
+      }
+
+      state.microtaskQueue = state.microtaskQueue.filter(
+        (item) => item !== event.label,
+      );
+      state.callStack = [event.label];
+      addStep(
+        `Process Microtask: ${event.label}`,
+        event.label,
+        "Microtask executes - promises have priority over macrotasks",
+      );
+      continue;
+    }
+
+    if (event.type === "macrotask-start") {
+      if (!eventLoopStarted) {
+        eventLoopStarted = true;
+        addStep(
+          "Call Stack EMPTY! Event Loop starts",
+          "EVENT LOOP STARTS",
+          "Call stack is empty. Event loop will process ALL microtasks first, then macrotasks",
+        );
+      }
+
+      state.callbackQueue = state.callbackQueue.filter(
+        (item) => item !== event.label,
+      );
+      state.callStack = [event.label];
+      addStep(
+        `Process Macrotask: ${event.label}`,
+        event.label,
+        "Macrotask executes from the Callback Queue",
+      );
+      continue;
+    }
+
+    if (event.type === "log") {
+      const logLabel = `console.log('${event.message}')`;
+      if (event.task) {
+        state.callStack = [event.task, logLabel];
+      } else {
+        state.callStack = [logLabel];
+      }
+
+      addStep(
+        `Execute: ${logLabel}`,
+        logLabel,
+        "console.log executes in the current task context",
+      );
+
+      state.output.push(event.message);
+      state.callStack = event.task ? [event.task] : [];
+    }
+  }
+
+  addStep(
+    "COMPLETE! All queues empty",
+    "DONE ✓",
+    "Execution complete. All tasks have been processed by the event loop.",
+  );
+
+  return steps;
 }
