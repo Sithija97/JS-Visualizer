@@ -1,26 +1,86 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-page-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f4f5;
+  --color-card-border: #e4e4e7;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-muted: #94a3b8;
+  --color-accent: #eafe7c;
+  --color-banner-text: #050505;
+  --color-control-surface: #ffffff;
+  --color-control-border: #e4e4e7;
+  --color-console-bg: #0f172a;
+  --color-console-border: #1e293b;
+  --color-console-text: #67e8f9;
+  --color-queue-callstack-bg: #ecfdf5;
+  --color-queue-callstack-border: #6ee7b7;
+  --color-queue-callstack-text: #065f46;
+  --color-queue-microtask-bg: #f5f3ff;
+  --color-queue-microtask-border: #c4b5fd;
+  --color-queue-microtask-text: #5b21b6;
+  --color-queue-callback-bg: #fff7ed;
+  --color-queue-callback-border: #fdba74;
+  --color-queue-callback-text: #9a3412;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--color-page-bg);
+  --color-foreground: var(--color-text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme="dark"] {
+  --color-page-bg: #050505;
+  --color-surface: #111111;
+  --color-surface-muted: #181818;
+  --color-card-border: #27272a;
+  --color-text-primary: #f4f4f5;
+  --color-text-secondary: #a1a1aa;
+  --color-muted: #71717a;
+  --color-accent: #eafe7c;
+  --color-banner-text: #020202;
+  --color-control-surface: #181818;
+  --color-control-border: #2e2e32;
+  --color-console-bg: #010101;
+  --color-console-border: #27272a;
+  --color-console-text: #5eead4;
+  --color-queue-callstack-bg: rgba(16, 185, 129, 0.15);
+  --color-queue-callstack-border: rgba(16, 185, 129, 0.4);
+  --color-queue-callstack-text: #a7f3d0;
+  --color-queue-microtask-bg: rgba(168, 85, 247, 0.15);
+  --color-queue-microtask-border: rgba(168, 85, 247, 0.4);
+  --color-queue-microtask-text: #d8b4fe;
+  --color-queue-callback-bg: rgba(251, 146, 60, 0.15);
+  --color-queue-callback-border: rgba(251, 146, 60, 0.4);
+  --color-queue-callback-text: #ffedd5;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page-bg);
+  color: var(--color-text-primary);
+  font-family:
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+code,
+pre {
+  font-family:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
 }
