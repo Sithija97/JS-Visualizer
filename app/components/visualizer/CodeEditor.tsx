@@ -59,7 +59,7 @@ export function CodeEditor({
         </div>
         <button
           onClick={onRunCode}
-          className="flex items-center gap-1.5 rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-black transition-colors hover:opacity-90"
+          className="flex items-center gap-1.5 rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-black transition-colors hover:opacity-90 cursor-pointer"
         >
           <Play className="h-3.5 w-3.5" />
           Visualize

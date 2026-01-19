@@ -147,7 +147,7 @@ export function VisualizerExperience() {
                   {/* <Button variant="outline" size="sm">
                     <IconGitBranch /> New Branch
                   </Button> */}
-                  <p className="text-[var(--color-text-secondary)]">
+                  <p className="text-[var(--color-text-secondary)] text-sm">
                     Edit the code on the left and click "Visualize Code" to see
                     the event loop in action
                   </p>

@@ -277,6 +277,16 @@ function buildSteps(result: AnalyzerResult): EventLoopStep[] {
       continue;
     }
 
+    if (event.type === "microtask-end") {
+      state.callStack = [];
+      addStep(
+        `Complete Microtask: ${event.label}`,
+        event.label,
+        "Microtask finished. Call stack is now empty.",
+      );
+      continue;
+    }
+
     if (event.type === "macrotask-start") {
       if (!eventLoopStarted) {
         eventLoopStarted = true;
@@ -295,6 +305,16 @@ function buildSteps(result: AnalyzerResult): EventLoopStep[] {
         `Process Macrotask: ${event.label}`,
         event.label,
         "Macrotask executes from the Callback Queue",
+      );
+      continue;
+    }
+
+    if (event.type === "macrotask-end") {
+      state.callStack = [];
+      addStep(
+        `Complete Macrotask: ${event.label}`,
+        event.label,
+        "Macrotask finished. Call stack is now empty.",
       );
       continue;
     }

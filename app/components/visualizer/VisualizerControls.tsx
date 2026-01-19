@@ -3,6 +3,7 @@
 import {
   ChevronLeft,
   ChevronRight,
+  Maximize,
   Pause,
   Play,
   RotateCcw,
@@ -31,7 +32,7 @@ export function VisualizerControls({
     <div className="flex flex-wrap gap-2">
       <button
         onClick={onPlayPause}
-        className="flex items-center gap-1.5 rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-black transition-colors hover:opacity-90"
+        className="flex items-center gap-1.5 rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-black transition-colors hover:opacity-90 cursor-pointer"
       >
         {isPlaying ? (
           <>
@@ -47,7 +48,7 @@ export function VisualizerControls({
       <button
         onClick={onPrevious}
         disabled={isFirstStep}
-        className="flex items-center gap-1.5 rounded-md bg-[var(--color-control-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex items-center gap-1.5 rounded-md bg-[var(--color-control-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] cursor-pointer transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         <ChevronLeft size={14} /> Prev
       </button>
@@ -55,16 +56,22 @@ export function VisualizerControls({
       <button
         onClick={onNext}
         disabled={isLastStep}
-        className="flex items-center gap-1.5 rounded-md bg-[var(--color-control-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex items-center gap-1.5 rounded-md bg-[var(--color-control-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] cursor-pointer transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Next <ChevronRight size={14} />
       </button>
 
       <button
         onClick={onReset}
-        className="flex items-center gap-1.5 rounded-md bg-[var(--color-control-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:opacity-90"
+        className="flex items-center gap-1.5 rounded-md bg-[var(--color-control-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] cursor-pointer transition-colors hover:opacity-90"
       >
         <RotateCcw size={14} /> Reset
+      </button>
+      <button
+        onClick={onNext}
+        className="flex items-center ml-auto rounded-md bg-[var(--color-control-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] cursor-pointer transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <Maximize size={14} />
       </button>
     </div>
   );
