@@ -8,7 +8,7 @@ const AUTO_PLAY_INTERVAL = 2000;
 export function useEventLoopVisualizer(steps: EventLoopStep[]) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const intervalRef = useRef<number>();
+  const intervalRef = useRef<number | undefined>(undefined);
 
   const totalSteps = steps.length;
   const isFirstStep = currentStep === 0;
