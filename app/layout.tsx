@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Event Loop Visualizer" }],
   openGraph: {
-    title: "JavaScript Event Loop Visualizer",
+    title: "UnderTheHood - JavaScript Event Loop Visualizer",
     description:
       "Interactive step-by-step visualization of JavaScript's event loop",
     type: "website",
