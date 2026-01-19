@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 type QueueType = "callstack" | "microtask" | "callback";
 
 type QueueVisualizerProps = {
@@ -7,6 +9,7 @@ type QueueVisualizerProps = {
   subtitle?: string;
   items: string[];
   queueType: QueueType;
+  disableScroll?: boolean;
 };
 
 const queueStyles: Record<QueueType, { dotClass: string; itemClass: string }> =
@@ -33,11 +36,17 @@ export function QueueVisualizer({
   subtitle,
   items,
   queueType,
+  disableScroll = false,
 }: QueueVisualizerProps) {
   const style = queueStyles[queueType];
 
   return (
-    <div className="flex h-full flex-col rounded-xl bg-[var(--color-surface)] p-4">
+    <div
+      className={cn(
+        "flex flex-col rounded-xl bg-[var(--color-surface)] p-4",
+        disableScroll ? "h-auto" : "h-full",
+      )}
+    >
       <div className="mb-2 flex items-center gap-2">
         <div className={`h-2 w-2 rounded-full ${style.dotClass}`} />
         <h3 className="text-sm font-bold text-[var(--color-text-primary)]">
@@ -50,7 +59,12 @@ export function QueueVisualizer({
         </p>
       ) : null}
 
-      <div className="flex-1 space-y-1.5 overflow-y-auto">
+      <div
+        className={cn(
+          "space-y-1.5",
+          disableScroll ? "" : "flex-1 overflow-y-auto",
+        )}
+      >
         {items.length === 0 ? (
           <div className="py-6 text-center text-xs text-[var(--color-muted)]">
             Empty

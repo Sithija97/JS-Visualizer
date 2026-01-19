@@ -3,12 +3,7 @@
 import { useEffect, useState } from "react";
 import { Banner } from "../ui/Banner";
 import { Navigation } from "../ui/Navigation";
-import { ProgressBar } from "../ui/ProgressBar";
-import { VisualizerControls } from "./VisualizerControls";
-import { CurrentStepDisplay } from "./CurrentStepDisplay";
-import { QueueVisualizer } from "./QueueVisualizer";
-import { ConsoleOutput } from "./ConsoleOutput";
-import { KeyConcepts } from "./KeyConcepts";
+import { VisualizerShell } from "./VisualizerShell";
 import { CodeEditor, DEFAULT_CODE } from "./CodeEditor";
 import { useEventLoopVisualizer } from "../../lib/hooks/use-event-loop-visualizer";
 import { useThemeMode } from "../../lib/hooks/use-theme-mode";
@@ -154,65 +149,38 @@ export function VisualizerExperience() {
                 </div>
               </div>
             ) : (
-              <div className="flex h-full flex-col gap-2">
-                {/* Controls - Fixed Height */}
-                <div className="flex-shrink-0">
-                  <VisualizerControls
+              (() => {
+                const expandedModalContent = (
+                  <VisualizerShell
                     isPlaying={isPlaying}
                     isFirstStep={isFirstStep}
                     isLastStep={isLastStep}
+                    currentStep={currentStep}
+                    totalSteps={totalSteps}
+                    currentStepData={currentStepData}
                     onPlayPause={handlePlayPause}
                     onPrevious={handlePrevious}
                     onNext={handleNext}
                     onReset={handleReset}
                   />
-                  <ProgressBar current={currentStep} total={totalSteps} />
-                </div>
+                );
 
-                {/* Current Step Display - Compact */}
-                <div className="flex-shrink-0">
-                  <CurrentStepDisplay
-                    description={currentStepData.description}
-                    explanation={currentStepData.explanation}
-                    highlight={currentStepData.highlight}
+                return (
+                  <VisualizerShell
+                    isPlaying={isPlaying}
+                    isFirstStep={isFirstStep}
+                    isLastStep={isLastStep}
+                    currentStep={currentStep}
+                    totalSteps={totalSteps}
+                    currentStepData={currentStepData}
+                    onPlayPause={handlePlayPause}
+                    onPrevious={handlePrevious}
+                    onNext={handleNext}
+                    onReset={handleReset}
+                    maximizedContent={expandedModalContent}
                   />
-                </div>
-
-                {/* Queues and Console - Flexible Grid */}
-                <div className="grid flex-1 grid-cols-1 gap-2 overflow-hidden 2xl:grid-cols-2">
-                  {/* Left Column: 3 Queues Stacked - Hidden on xl and below, visible from 2xl */}
-                  <div className="hidden flex-col gap-2 overflow-hidden 2xl:flex">
-                    <div className="flex-1 overflow-hidden">
-                      <QueueVisualizer
-                        title="Call Stack"
-                        items={currentStepData.callStack}
-                        queueType="callstack"
-                      />
-                    </div>
-                    <div className="flex-1 overflow-hidden">
-                      <QueueVisualizer
-                        title="Microtask Queue"
-                        subtitle="Promises, async/await"
-                        items={currentStepData.microtaskQueue}
-                        queueType="microtask"
-                      />
-                    </div>
-                    <div className="flex-1 overflow-hidden">
-                      <QueueVisualizer
-                        title="Callback Queue"
-                        subtitle="setTimeout, setInterval"
-                        items={currentStepData.callbackQueue}
-                        queueType="callback"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Right Column: Console Output */}
-                  <div className="overflow-hidden">
-                    <ConsoleOutput output={currentStepData.output} />
-                  </div>
-                </div>
-              </div>
+                );
+              })()
             )}
           </div>
         </div>
