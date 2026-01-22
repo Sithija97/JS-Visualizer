@@ -17,25 +17,33 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  applicationName: "JavaScript Event Loop Visualizer",
   title: {
     default: "JavaScript Event Loop Visualizer",
     template: "%s | JavaScript Event Loop Visualizer",
   },
   description:
-    "Event loop visualizer for JavaScript. Learn how the call stack, microtasks, and macrotasks work with an interactive, step-by-step simulation.",
+    "Interactive JavaScript event loop visualizer. Learn call stack, microtasks, and macrotasks with step-by-step simulations and real code examples.",
   keywords: [
+    "js event loop",
+    "javascript event loop",
     "event loop visualizer",
     "event loop visualiser",
-    "JavaScript event loop",
+    "event loop tutorial",
     "event loop simulation",
     "microtask queue",
     "macrotask queue",
     "call stack",
     "promises",
-    "async JavaScript",
-    "JavaScript",
+    "async javascript",
+    "setTimeout",
+    "queueMicrotask",
+    "requestAnimationFrame",
+    "javascript concurrency",
   ],
   authors: [{ name: "Event Loop Visualizer" }],
+  creator: "Event Loop Visualizer",
+  publisher: "Event Loop Visualizer",
   alternates: {
     canonical: "/",
   },
@@ -53,15 +61,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: "JavaScript Event Loop Visualizer",
     description:
-      "Interactive, step-by-step visualization of the JavaScript event loop.",
+      "Interactive JavaScript event loop visualizer with step-by-step simulations for the call stack, microtasks, and macrotasks.",
     url: "/",
     siteName: "JavaScript Event Loop Visualizer",
     type: "website",
+    locale: "en_US",
     images: [
       {
-        url: "/js.png",
-        width: 512,
-        height: 512,
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
         alt: "JavaScript Event Loop Visualizer",
       },
     ],
@@ -70,8 +79,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "JavaScript Event Loop Visualizer",
     description:
-      "Interactive, step-by-step visualization of the JavaScript event loop.",
-    images: ["/js.png"],
+      "Interactive JavaScript event loop visualizer with step-by-step simulations.",
+    images: ["/twitter-image"],
   },
   icons: {
     icon: "/js.png",
