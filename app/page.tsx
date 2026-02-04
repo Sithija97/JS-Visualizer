@@ -1,5 +1,38 @@
+import type { Metadata } from "next";
 import Script from "next/script";
 import { VisualizerExperience } from "./components/visualizer/VisualizerExperience";
+
+export const metadata: Metadata = {
+  title: "JS Event Loop Animation & Visualizer",
+  description:
+    "JS event loop animation and visualizer. Learn how the call stack, microtasks, and macrotasks execute with step-by-step simulations and real examples.",
+  keywords: [
+    "js event loop",
+    "event loop animation",
+    "javascript event loop",
+    "event loop visualizer",
+    "event loop visualiser",
+    "call stack",
+    "microtask queue",
+    "macrotask queue",
+    "promises",
+    "setTimeout",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "JS Event Loop Animation & Visualizer",
+    description:
+      "Interactive JS event loop animation with step-by-step simulations of the call stack, microtasks, and macrotasks.",
+    url: "/",
+  },
+  twitter: {
+    title: "JS Event Loop Animation & Visualizer",
+    description:
+      "Interactive JS event loop animation and visualizer with step-by-step simulations.",
+  },
+};
 
 export default function Home() {
   const siteUrl = "https://js-visualizer-jade.vercel.app";
